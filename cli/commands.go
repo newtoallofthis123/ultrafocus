@@ -51,3 +51,23 @@ var commandConfigureBlacklist = command{
 		return m
 	},
 }
+
+var startTime = command{
+	Name: "start timer",
+	Desc: "Start timer.",
+	Run: func(m model) model {
+		m.state = timeView
+		m.timer.Init()
+		return m
+	},
+}
+
+var stopTime = command{
+	Name: "stop timer",
+	Desc: "Stop timer.",
+	Run: func(m model) model {
+		m.state = timeView
+		m.timer.Stop()
+		return m
+	},
+}

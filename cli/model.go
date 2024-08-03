@@ -2,8 +2,10 @@ package cli
 
 import (
 	"strings"
+	"time"
 
 	"github.com/charmbracelet/bubbles/textarea"
+	"github.com/charmbracelet/bubbles/timer"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/plutov/ultrafocus/hosts"
 )
@@ -13,10 +15,12 @@ type sessionState uint
 const (
 	menuView sessionState = iota
 	blacklistView
+	timeView
 )
 
 type model struct {
 	textarea              textarea.Model
+	timer                 timer.Model
 	fatalErr              error
 	status                hosts.FocusStatus
 	domains               []string
@@ -33,6 +37,7 @@ func NewModel() model {
 
 	return model{
 		textarea: GetTextareModel(),
+		timer:    GetTimerModel(time.Second * 5),
 		domains:  domains,
 		state:    menuView,
 		status:   status,
@@ -50,10 +55,10 @@ func (m model) Init() tea.Cmd {
 
 func (m *model) getCommandsList() []command {
 	if m.status == hosts.FocusStatusOn {
-		return []command{commandFocusOff, commandConfigureBlacklist}
+		return []command{commandFocusOff, commandConfigureBlacklist, startTime, stopTime}
 	}
 
-	return []command{commandFocusOn, commandConfigureBlacklist}
+	return []command{commandFocusOn, commandConfigureBlacklist, startTime, stopTime}
 }
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
@@ -64,6 +69,15 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	cmds = append(cmds, cmd)
 
 	switch msg := msg.(type) {
+	case timer.TickMsg:
+		var cmd tea.Cmd
+		m.timer, cmd = m.timer.Update(msg)
+		return m, cmd
+
+	case timer.StartStopMsg:
+		var cmd tea.Cmd
+		m.timer, cmd = m.timer.Update(msg)
+		return m, cmd
 
 	case tea.KeyMsg:
 		commands := m.getCommandsList()

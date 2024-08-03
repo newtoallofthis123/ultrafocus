@@ -58,6 +58,11 @@ func (m model) View() string {
 		s += l.String() + "\n\n"
 	}
 
+	if m.state == timeView {
+		s += "Timer: " + m.timer.View() + "\n\n"
+		m.timer.Start()
+	}
+
 	s += "press q to quit.\n"
 
 	return s
